@@ -39,3 +39,19 @@ Set the appropriate permissions for the new group on key directories.
 sudo chown root:readonly /usr /bin /etc /lib /sbin /var /opt
 sudo chmod 755 /usr /bin /etc /lib /sbin /var /opt
 ```
+
+# Step 3: Ensure Desktop Environment Functions
+
+
+```
+sudo chown root:root /home/<username>
+sudo chmod 755 /home/<username>
+```
+
+# Step 4: Restrict Sudo Access
+
+```
+sudo deluser <username> sudo
+```
+
+
