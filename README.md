@@ -14,44 +14,54 @@ Replace <username> with the desired username for the new user. Follow the prompt
 
 To ensure the user cannot write to any directories except their own, you can modify the user's permissions and set the filesystem to read-only for that user.
 
-2.1. Change Ownership of Home Directory
-Change the ownership of the home directory to root so the user can't write to their home directory.
+* create file `setup_readonly_user.sh`
+* `chmod +x setup_readonly_user.sh`
+* `./setup_readonly_user.sh`
 
 ```
-sudo chown root:root /home/<username>
-sudo chmod 755 /home/<username>
+#!/bin/bash
+
+# Variables
+USERNAME="<username>"
+GROUP="readonlygroup"
+APPLICATION="/usr/bin/firefox"
+CONFIG_DIR="/home/$USERNAME/.mozilla"
+
+# Create a New User
+sudo adduser $USERNAME
+
+# Create a Read-Only Group
+sudo groupadd $GROUP
+
+# Add the New User to the Read-Only Group
+sudo usermod -aG $GROUP $USERNAME
+
+# Create Necessary Directories
+sudo mkdir -p /home/$USERNAME/Desktop
+
+# Set Permissions for the Desktop Directory
+sudo chown -R root:$GROUP /home/$USERNAME/Desktop
+sudo chmod -R 755 /home/$USERNAME/Desktop
+
+# Set More Permissive Permissions for the Home Directory
+sudo chown -R $USERNAME:$USERNAME /home/$USERNAME
+sudo chmod 755 /home/$USERNAME
+
+# Optionally restrict other directories
+# sudo chown -R root:$GROUP /home/$USERNAME/SpecificDirectory
+# sudo chmod -R 755 /home/$USERNAME/SpecificDirectory
+
+# Ensure the application binary is executable
+sudo chmod +x $APPLICATION
+
+# Set ownership and permissions on the application configuration directory
+sudo mkdir -p $CONFIG_DIR
+sudo chown -R $USERNAME:$USERNAME $CONFIG_DIR
+sudo chmod -R 755 $CONFIG_DIR
+
+# Verify Permissions
+ls -l /home/$USERNAME
+ls -l /home/$USERNAME/Desktop
+ls -l $APPLICATION
+ls -l $CONFIG_DIR
 ```
-
-# 2.2. Create a Read-Only Group
-
-Create a new group and add the user to this group. This group will have read-only permissions on the system.
-
-```
-sudo groupadd readonly
-sudo usermod -aG readonly <username>
-```
-
-# 2.3. Set Permissions on Key Directories
-
-Set the appropriate permissions for the new group on key directories.
-
-```
-sudo chown root:readonly /usr /bin /etc /lib /sbin /var /opt
-sudo chmod 755 /usr /bin /etc /lib /sbin /var /opt
-```
-
-# Step 3: Ensure Desktop Environment Functions
-
-
-```
-sudo chown root:root /home/<username>
-sudo chmod 755 /home/<username>
-```
-
-# Step 4: Restrict Sudo Access
-
-```
-sudo deluser <username> sudo
-```
-
-
